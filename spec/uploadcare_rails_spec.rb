@@ -66,7 +66,7 @@ describe Uploadcare::Rails do
 
     class ResumeNew < ActiveRecord::Base
       self.table_name = 'resumes'
-      attr_accessible :attachment, :description, :name
+      # attr_accessible :attachment, :description, :name
       is_uploadcare_file :attachment, autostore: false
     end
 
