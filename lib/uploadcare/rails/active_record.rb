@@ -3,6 +3,8 @@ require 'uploadcare/rails/file'
 module Uploadcare
   module Rails
     module ActiveRecord
+      @@UUID_REGEX = /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i
+
       def is_uploadcare_file attribute, options = {}
         options.symbolize_keys!
         opts = {
@@ -20,7 +22,8 @@ module Uploadcare
             api = ::Rails.application.config.uploadcare.api
             file_data = File.new(api, cdn_url)
             instance_variable_set("@#{attribute}_cached", file_data)
-            file_data
+            # file_data
+            OpenStruct.new :cdn_url => file_data.cdn_url, :uuid =>file_data.uuid
           end
         end
 
@@ -28,17 +31,17 @@ module Uploadcare
           after_save "store_#{attribute}"
 
           define_method "store_#{attribute}" do
-            re = /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i
-            m = re.match(attributes[attribute.to_s])
-            return unless m && m[0]
+            matched = @@UUID_REGEX.match(attributes[attribute.to_s])
+            return unless matched && matched[0]
 
-            uuid = m[0]
+            uuid = matched[0]
+
             stored = ::Rails.cache.exist?(
               "uploadcare.file.#{uuid}.store",
               force: opts[:force_autostore]
             )
 
-             unless stored
+            unless stored
               begin
                 send(attribute).api.store
                 ::Rails.cache.write("uploadcare.file.#{uuid}.store", true)
@@ -49,7 +52,6 @@ module Uploadcare
 
                 raise e unless ::Rails.application.config.uploadcare.silence_save_errors
               end
-
             end
           end
         end

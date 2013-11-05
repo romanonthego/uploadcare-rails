@@ -1,6 +1,6 @@
 module Uploadcare
   module Rails
-    class File
+    class File < OpenStruct
 
       attr_reader :uuid
       alias_method :file_id, :uuid
@@ -9,6 +9,19 @@ module Uploadcare
         @api = api
         @cdn_url = cdn_url
         @uuid = @api.uuid(cdn_url)
+      end
+
+      def to_builder
+        Jbuilder.new do |file|
+          file.(self, :cdn_url, :uuid)
+        end
+      end
+
+      def to_json
+        {
+          cdn_url: @cdn_url,
+          uuid: @uuid
+        }
       end
 
       def cdn_url(*operations)
