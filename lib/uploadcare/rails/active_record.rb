@@ -22,8 +22,7 @@ module Uploadcare
             api = ::Rails.application.config.uploadcare.api
             file_data = File.new(api, cdn_url)
             instance_variable_set("@#{attribute}_cached", file_data)
-            # file_data
-            OpenStruct.new :cdn_url => file_data.cdn_url, :uuid =>file_data.uuid
+            file_data
           end
         end
 

@@ -9,19 +9,7 @@ module Uploadcare
         @api = api
         @cdn_url = cdn_url
         @uuid = @api.uuid(cdn_url)
-      end
-
-      def to_builder
-        Jbuilder.new do |file|
-          file.(self, :cdn_url, :uuid)
-        end
-      end
-
-      def to_json
-        {
-          cdn_url: @cdn_url,
-          uuid: @uuid
-        }
+        super uuid: @uuid, cdn_url: @cdn_url
       end
 
       def cdn_url(*operations)
@@ -36,6 +24,9 @@ module Uploadcare
 
       alias_method :info, :api
 
+      def to_json
+        marshal_dump
+      end
     end
   end
 end
